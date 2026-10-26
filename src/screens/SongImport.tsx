@@ -6,7 +6,7 @@ import type { ScreenProps, SongMode } from '../types';
 export function SongImport({ update, go, mode }: ScreenProps & { mode: SongMode }) {
   const [text, setText] = useState('');
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
-  const back = () => go({ name: 'songs', mode, filter: 'mine' });
+  const back = () => go({ name: 'songs', mode });
 
   const importSongs = () => {
     try {

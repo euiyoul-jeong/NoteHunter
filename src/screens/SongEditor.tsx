@@ -39,7 +39,7 @@ export function SongEditor({ data, update, go, mode, songId }: ScreenProps & { m
   const stackable = useRef(false);
   const busRef = useRef<GainNode | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const back = () => go({ name: 'songs', mode, filter: 'mine' });
+  const back = () => go({ name: 'songs', mode });
 
   const sources = {
     treble: tokensToSource(voices.treble, beatsPerMeasure),

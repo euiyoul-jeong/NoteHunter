@@ -33,7 +33,7 @@ export function App() {
     case 'quiz':
       return <QuizMode key={JSON.stringify(screen)} {...props} specKey={screen.key} />;
     case 'songs':
-      return <SongSelect {...props} mode={screen.mode} filter={screen.filter} />;
+      return <SongSelect {...props} mode={screen.mode} />;
     case 'songImport':
       return <SongImport {...props} mode={screen.mode} />;
     case 'songEdit':

@@ -1,10 +1,10 @@
 import { allSongs, songSteps } from '../core/songs';
 import type { StaffKind } from '../core/notes';
+import type { SongFilter } from '../core/storage';
 import type { ScreenProps, SongMode } from '../types';
 
 const TEMPOS = [0.6, 0.8, 1, 1.2];
-type Filter = StaffKind | 'all' | 'mine';
-const FILTERS: { id: Filter; label: string }[] = [
+const FILTERS: { id: SongFilter; label: string }[] = [
   { id: 'all', label: '전체' },
   { id: 'treble', label: '높은음자리표' },
   { id: 'bass', label: '낮은음자리표' },
@@ -13,9 +13,12 @@ const FILTERS: { id: Filter; label: string }[] = [
 ];
 const BADGE: Record<StaffKind, string> = { treble: '높은음', bass: '낮은음', grand: '양손' };
 
-export function SongSelect({ data, update, go, mode, filter = 'all' }: ScreenProps & { mode: SongMode; filter?: Filter }) {
+export function SongSelect({ data, update, go, mode }: ScreenProps & { mode: SongMode }) {
   const tempo = data.settings.rhythmTempo;
   const setTempo = (rhythmTempo: number) => update((d) => ({ ...d, settings: { ...d.settings, rhythmTempo } }));
+  // 고른 분류는 저장해 두어 게임을 마치고 돌아와도 그대로 보인다
+  const filter = data.settings.songFilter;
+  const setFilter = (songFilter: SongFilter) => update((d) => ({ ...d, settings: { ...d.settings, songFilter } }));
   const rhythm = mode === 'rhythm';
   const mineIds = new Set(data.customSongs.map((c) => c.id));
   const songs = allSongs(data.customSongs).filter((s) =>
@@ -42,7 +45,7 @@ export function SongSelect({ data, update, go, mode, filter = 'all' }: ScreenPro
 
       <div className="tempo-row">
         {FILTERS.map((f) => (
-          <button key={f.id} className={`chip ${f.id === filter ? 'active' : ''}`} onClick={() => go({ name: 'songs', mode, filter: f.id })}>
+          <button key={f.id} className={`chip ${f.id === filter ? 'active' : ''}`} onClick={() => setFilter(f.id)}>
             {f.label}
             {f.id === 'mine' && data.customSongs.length > 0 && ` ${data.customSongs.length}`}
           </button>

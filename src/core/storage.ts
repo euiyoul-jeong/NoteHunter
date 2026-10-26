@@ -1,6 +1,9 @@
-import type { NameStyle } from './notes';
+import type { NameStyle, StaffKind } from './notes';
 import { DEFAULT_FREE, type FreeConfig } from './quiz';
 import type { CustomSong } from './songs';
+
+/** 곡 선택 화면의 분류 */
+export type SongFilter = StaffKind | 'all' | 'mine';
 
 export interface Settings {
   nameStyle: NameStyle;
@@ -11,6 +14,8 @@ export interface Settings {
   lastFree: FreeConfig;
   /** 리듬 게임 빠르기 (1 = 100%) */
   rhythmTempo: number;
+  /** 곡 선택에서 마지막으로 고른 분류 */
+  songFilter: SongFilter;
 }
 
 export interface SongRecord {
@@ -38,6 +43,7 @@ export function defaultSaveData(): SaveData {
       metronome: true,
       lastFree: { ...DEFAULT_FREE },
       rhythmTempo: 1,
+      songFilter: 'all',
     },
     quizBest: {},
     songBest: {},
