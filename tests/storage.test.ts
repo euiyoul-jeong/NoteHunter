@@ -34,6 +34,12 @@ describe('storage', () => {
     expect('unlockedLevel' in data).toBe(false);
   });
 
+  it('빠르기 기본 100%, 내 곡 기본 빈 목록 — 예전 저장 데이터에도 채워짐', () => {
+    const data = loadSaveData(memoryStore({ [STORAGE_KEY]: JSON.stringify({ settings: { nameStyle: 'letter' } }) }));
+    expect(data.settings.rhythmTempo).toBe(1);
+    expect(data.customSongs).toEqual([]);
+  });
+
   it('깨진 JSON은 기본값', () => {
     expect(loadSaveData(memoryStore({ [STORAGE_KEY]: '{oops' }))).toEqual(defaultSaveData());
   });

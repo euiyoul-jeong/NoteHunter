@@ -8,7 +8,7 @@ export function Settings({ data, update, go }: ScreenProps) {
 
   const resetRecords = () => {
     if (window.confirm('최고 기록을 모두 지울까요?')) {
-      update((d) => ({ ...defaultSaveData(), settings: d.settings }));
+      update((d) => ({ ...defaultSaveData(), settings: d.settings, customSongs: d.customSongs }));
     }
   };
 

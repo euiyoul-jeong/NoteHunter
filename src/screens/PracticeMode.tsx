@@ -13,7 +13,7 @@ import type { ScreenProps } from '../types';
 const HINT_AFTER = 2;
 
 export function PracticeMode({ data, update, go, songId }: ScreenProps & { songId: string }) {
-  const song = getSong(songId);
+  const song = getSong(songId, data.customSongs);
   const { settings } = data;
   const layout = useMemo(() => layoutSong(song.notes, CLEF_WIDTH + 26), [song]);
   const steps = useMemo(() => songSteps(song), [song]);

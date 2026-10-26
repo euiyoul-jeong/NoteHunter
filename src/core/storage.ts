@@ -1,5 +1,6 @@
 import type { NameStyle } from './notes';
 import { DEFAULT_FREE, type FreeConfig } from './quiz';
+import type { CustomSong } from './songs';
 
 export interface Settings {
   nameStyle: NameStyle;
@@ -8,6 +9,8 @@ export interface Settings {
   metronome: boolean;
   /** 마지막으로 고른 자유 연습 설정 */
   lastFree: FreeConfig;
+  /** 리듬 게임 빠르기 (1 = 100%) */
+  rhythmTempo: number;
 }
 
 export interface SongRecord {
@@ -20,15 +23,25 @@ export interface SaveData {
   /** 퀴즈 키('treble-1', 'free:...') → 최고 점수 */
   quizBest: Record<string, number>;
   songBest: Record<string, SongRecord>;
+  /** 가져온 내 곡 (이 기기에만 저장) */
+  customSongs: CustomSong[];
 }
 
 export const STORAGE_KEY = 'noteHunter.v1';
 
 export function defaultSaveData(): SaveData {
   return {
-    settings: { nameStyle: 'solfege', showKeyLabels: true, volume: 0.8, metronome: true, lastFree: { ...DEFAULT_FREE } },
+    settings: {
+      nameStyle: 'solfege',
+      showKeyLabels: true,
+      volume: 0.8,
+      metronome: true,
+      lastFree: { ...DEFAULT_FREE },
+      rhythmTempo: 1,
+    },
     quizBest: {},
     songBest: {},
+    customSongs: [],
   };
 }
 
@@ -63,6 +76,7 @@ export function loadSaveData(store: KV | null = defaultStore()): SaveData {
       },
       quizBest: migrateQuizBest(saved.quizBest),
       songBest: { ...saved.songBest },
+      customSongs: Array.isArray(saved.customSongs) ? saved.customSongs : [],
     };
   } catch {
     return base;

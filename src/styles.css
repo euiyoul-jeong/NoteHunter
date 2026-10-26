@@ -1107,3 +1107,130 @@ button {
   background: linear-gradient(#3b7be0, #2456a8);
   color: #fff;
 }
+
+/* ---------- 내 곡 ---------- */
+.mine-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.song-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.song-row .list-card {
+  flex: 1;
+}
+
+.song-row .icon-btn.delete {
+  height: auto;
+  color: var(--bad);
+}
+
+.code-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--text);
+  font: 0.85rem/1.4 ui-monospace, 'Cascadia Code', Consolas, monospace;
+  resize: vertical;
+}
+
+.import-result {
+  margin: 10px 0;
+  word-break: break-all;
+}
+
+.import-result.ok {
+  color: var(--good);
+}
+
+.import-result.bad {
+  color: var(--bad);
+}
+
+.button-row .btn:disabled {
+  opacity: 0.5;
+}
+
+.song-row .icon-btn.edit {
+  height: auto;
+}
+
+/* ---------- 곡 만들기 ---------- */
+.editor-head {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.title-input {
+  flex: 1;
+  min-width: 140px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+}
+
+.bpm {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.bpm input {
+  width: 56px;
+  padding: 5px 6px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--text);
+  font: inherit;
+}
+
+.editor-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 8px;
+}
+
+.editor-tools .chip-group {
+  justify-content: flex-start;
+}
+
+.editor-tools .chip:disabled {
+  opacity: 0.4;
+}
+
+.editor-message {
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+
+.editor-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--staff);
+  pointer-events: none;
+}
+
+.editor .keyboard {
+  height: clamp(110px, 30vh, 240px);
+}

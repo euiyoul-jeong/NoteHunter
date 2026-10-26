@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SONGS, getSong, parseSong, songSteps } from '../src/core/songs';
+import { SONGS, allSongs, decodePack, getSong, parseSong, songSteps, type CustomSong } from '../src/core/songs';
 import { layoutSong } from '../src/core/layout';
 import { toMidi } from '../src/core/notes';
 
@@ -66,5 +66,48 @@ describe('내장 곡', () => {
         if (a.startBeat === b.startBeat) expect(xs[i]).toBe(xs[j]);
       }),
     );
+  });
+});
+
+describe('내 곡 가져오기', () => {
+  const pack = JSON.stringify({
+    noteHunterSongs: 1,
+    songs: [
+      { title: '연습곡', bpm: 100, beatsPerMeasure: 4, treble: 'C4q D4q E4q F4q | G4w', bass: 'C3w | G2w' },
+      { title: '오른손만', treble: 'E4h D4h | C4w' },
+    ],
+  });
+
+  it('곡 코드 읽기 (기본값 채움)', () => {
+    const songs = decodePack(pack);
+    expect(songs.map((s) => s.title)).toEqual(['연습곡', '오른손만']);
+    expect(songs[1].bpm).toBe(90);
+    expect(songs[1].beatsPerMeasure).toBe(4);
+    expect(songs[1].bass).toBeUndefined();
+  });
+
+  it('곡 하나짜리 객체·배열도 허용', () => {
+    expect(decodePack(JSON.stringify({ title: 'A', treble: 'C4w' }))).toHaveLength(1);
+    expect(decodePack(JSON.stringify([{ title: 'A', treble: 'C4w' }, { title: 'B', bass: 'C3w' }]))).toHaveLength(2);
+  });
+
+  it('오류 위치를 알려 준다', () => {
+    expect(() => decodePack('not json')).toThrow('형식');
+    expect(() => decodePack(JSON.stringify({ songs: [{ title: 'A', treble: 'C4w' }, { title: 'B', treble: 'C4x' }] }))).toThrow(
+      /2번째 곡\(B\).*C4x/,
+    );
+    expect(() => decodePack(JSON.stringify({ songs: [{ treble: 'C4w' }] }))).toThrow('제목');
+    expect(() => decodePack(JSON.stringify({ songs: [{ title: 'A' }] }))).toThrow('음표');
+  });
+
+  it('내 곡도 찾고, 내장 곡과 합쳐 목록에 나온다', () => {
+    const [first] = decodePack(pack);
+    const custom: CustomSong = { ...first, id: 'my-test' };
+    const song = getSong('my-test', [custom]);
+    expect(song.staff).toBe('grand');
+    expect(song.title).toBe('연습곡');
+    expect(getSong('my-test', [custom])).toBe(song); // 같은 객체 재사용 (화면 재계산 방지)
+    expect(allSongs([custom]).slice(-1)[0].id).toBe('my-test');
+    expect(() => getSong('my-test')).toThrow();
   });
 });

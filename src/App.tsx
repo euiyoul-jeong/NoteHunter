@@ -6,6 +6,8 @@ import { Home } from './screens/Home';
 import { LevelSelect } from './screens/LevelSelect';
 import { QuizMode } from './screens/QuizMode';
 import { SongSelect } from './screens/SongSelect';
+import { SongImport } from './screens/SongImport';
+import { SongEditor } from './screens/SongEditor';
 import { PracticeMode } from './screens/PracticeMode';
 import { RhythmMode } from './screens/RhythmMode';
 import { Result } from './screens/Result';
@@ -31,7 +33,11 @@ export function App() {
     case 'quiz':
       return <QuizMode key={JSON.stringify(screen)} {...props} specKey={screen.key} />;
     case 'songs':
-      return <SongSelect {...props} mode={screen.mode} />;
+      return <SongSelect {...props} mode={screen.mode} filter={screen.filter} />;
+    case 'songImport':
+      return <SongImport {...props} mode={screen.mode} />;
+    case 'songEdit':
+      return <SongEditor key={screen.songId ?? 'new'} {...props} mode={screen.mode} songId={screen.songId} />;
     case 'practice':
       return <PracticeMode key={JSON.stringify(screen)} {...props} songId={screen.songId} />;
     case 'rhythm':

@@ -8,7 +8,9 @@ export type Screen =
   | { name: 'levels'; tab?: QuizTab }
   /** key: 레벨 키('bass-3') 또는 자유 연습 키('free:...') */
   | { name: 'quiz'; key: string }
-  | { name: 'songs'; mode: SongMode }
+  | { name: 'songs'; mode: SongMode; filter?: 'all' | 'treble' | 'bass' | 'grand' | 'mine' }
+  | { name: 'songImport'; mode: SongMode }
+  | { name: 'songEdit'; mode: SongMode; songId?: string }
   | { name: 'practice'; songId: string }
   | { name: 'rhythm'; songId: string; tempo: number }
   | { name: 'result'; result: GameResult }

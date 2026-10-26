@@ -42,7 +42,7 @@ function rank(acc: number): string {
 }
 
 export function RhythmMode({ data, update, go, songId, tempo }: ScreenProps & { songId: string; tempo: number }) {
-  const song = getSong(songId);
+  const song = getSong(songId, data.customSongs);
   const { settings } = data;
   const spb = 60 / (song.bpm * tempo);
   const countIn = song.beatsPerMeasure;

@@ -35,6 +35,12 @@ npm run build    # dist/ 에 정적 빌드 (상대 경로 — Capacitor webDir �
 - `src/components/` — SVG 오선(`Staff`: 높은음/낮은음/큰보표, 화음), 멀티터치 건반(`PianoKeyboard`, 범위 자동), HUD
 - `src/screens/` — 화면별 컴포넌트
 
+## 내 곡 (기기에만 저장)
+곡 목록의 **'내 곡'** 필터에서 사용한다. 저장소·웹사이트에는 올라가지 않고 그 기기(localStorage)에만 저장된다.
+- **+ 새 곡 만들기**: 화면 건반으로 입력 (온/2분/4분/8분·점·쉼표·화음 묶기, 오른손/왼손, 마디줄 자동). ✎ 로 다시 고치기
+- **가져오기**: 곡 코드(`{"noteHunterSongs":1,"songs":[{"title","bpm","beatsPerMeasure","treble","bass"}]}`)를 붙여넣기
+- 만든 곡은 [코드 복사]로 다른 기기에 옮길 수 있다
+
 ## 곡 추가
 `src/core/songs.ts` 의 `SONGS` 에 텍스트 표기로 추가한다. 예: `E4q D4q C4q D4q | E4h.` (w/h/q/e = 온/2분/4분/8분, `.` 점음표, `R` 쉼표, `|` 마디줄, `C3+E3+G3h` 화음).
 성부는 `{ treble: '...', bass: '...' }` 로 적고, 둘 다 있으면 큰보표(양손) 곡이 된다. 건반 범위는 곡의 음역에 맞춰 자동으로 정해진다.
