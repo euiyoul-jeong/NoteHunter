@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { getSong, songMidis, songSteps } from '../core/songs';
+import { getSong, songMidis, songSteps, tieTargets } from '../core/songs';
 import { layoutSong } from '../core/layout';
 import { keyboardRange, pitchName, toMidi } from '../core/notes';
 import { audioNow, createBus, playNote, unlockAudio } from '../core/audio';
@@ -17,6 +17,7 @@ export function PracticeMode({ data, update, go, songId }: ScreenProps & { songI
   const { settings } = data;
   const layout = useMemo(() => layoutSong(song.notes, CLEF_WIDTH + 26), [song]);
   const steps = useMemo(() => songSteps(song), [song]);
+  const ties = useMemo(() => tieTargets(song.notes), [song]);
   const range = useMemo(() => keyboardRange(songMidis(song)), [song]);
   const viewHeight = staffHeight(song.staff);
 
@@ -80,11 +81,11 @@ export function PracticeMode({ data, update, go, songId }: ScreenProps & { songI
     const at = (sec: number, fn: () => void) => timers.push(window.setTimeout(fn, sec * 1000));
     let end = 0;
     song.notes.forEach((n, i) => {
-      if (n.pitches.length === 0) return;
-      for (const p of n.pitches) playNote(toMidi(p), Math.min(n.beats * spb + 0.3, 2), t0 + n.startBeat * spb, bus);
+      if (n.pitches.length === 0 || n.tied) return;
+      for (const p of n.pitches) playNote(toMidi(p), Math.min(n.holdBeats * spb + 0.3, 3), t0 + n.startBeat * spb, bus);
       // 소리와 같은 시각에 건반을 누르고, 다음 음 직전에 뗀다
       const on = lead + n.startBeat * spb;
-      const off = on + Math.max(n.beats * spb - 0.06, 0.08);
+      const off = on + Math.max(n.holdBeats * spb - 0.06, 0.08);
       at(on, () => {
         setPlayingNotes((s) => new Set(s).add(i));
         scrollToNote(i);
@@ -176,7 +177,8 @@ export function PracticeMode({ data, update, go, songId }: ScreenProps & { songI
       n.pitches.length > 0 && (showNames || (hint && currentNotes.has(i)))
         ? n.pitches.map((p) => pitchName(p, settings.nameStyle)).join('·')
         : undefined;
-    return { id: i, pitches: n.pitches, clef: n.clef, beats: n.beats, x: layout.xs[i], state, label };
+    const tj = ties.get(i);
+    return { id: i, pitches: n.pitches, clef: n.clef, beats: n.beats, x: layout.xs[i], state, label, tieTo: tj === undefined ? undefined : layout.xs[tj] };
   });
 
   const keyMarks: Partial<Record<number, KeyMark>> = { ...marks };

@@ -1234,3 +1234,9 @@ button {
 .editor .keyboard {
   height: clamp(110px, 30vh, 240px);
 }
+
+.note .tie {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}

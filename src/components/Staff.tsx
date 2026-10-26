@@ -39,6 +39,8 @@ export interface StaffNote {
   x: number;
   state?: NoteState;
   label?: string;
+  /** 붙임줄로 이어지는 다음 음표의 x */
+  tieTo?: number;
 }
 
 interface Props {
@@ -240,6 +242,14 @@ function NoteGlyph({ note, kind }: { note: StaffNote; kind: StaffKind }) {
           {a.acc === 1 ? '♯' : '♭'}
         </text>
       ))}
+      {note.tieTo !== undefined &&
+        heads.map((h, i) => {
+          const hy = y(h.step) + (stemUp ? 7 : -7);
+          const dir = stemUp ? 1 : -1;
+          const x1 = x + shift[i] + 6;
+          const x2 = note.tieTo! - 6;
+          return <path key={`tie${i}`} className="tie" d={`M${x1} ${hy} Q${(x1 + x2) / 2} ${hy + dir * 12} ${x2} ${hy}`} />;
+        })}
       {label && (
         <text className="note-label" x={x} y={labelY(kind, clef)} textAnchor="middle">
           {label}

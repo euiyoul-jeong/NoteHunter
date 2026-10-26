@@ -11,6 +11,8 @@ export interface EditToken {
   pitches: string[];
   dur: Dur;
   dotted: boolean;
+  /** 다음 음표와 붙임줄 */
+  tie?: boolean;
 }
 
 const BEATS: Record<Dur, number> = { w: 4, h: 2, q: 1, e: 0.5 };
@@ -34,7 +36,7 @@ export function tokensToSource(tokens: EditToken[], beatsPerMeasure: number): st
   let beats = 0;
   tokens.forEach((t, i) => {
     const pitch = t.pitches.length ? t.pitches.join('+') : 'R';
-    parts.push(pitch + t.dur + (t.dotted ? '.' : ''));
+    parts.push(pitch + t.dur + (t.dotted ? '.' : '') + (t.tie && t.pitches.length ? '~' : ''));
     beats += tokenBeats(t);
     const full = Math.abs(beats / beatsPerMeasure - Math.round(beats / beatsPerMeasure)) < 1e-9;
     if (full && i < tokens.length - 1) parts.push('|');
@@ -57,7 +59,9 @@ export function sourceToTokens(source: string | undefined, clef: Clef): EditToke
   if (!source?.trim()) return [];
   return parseSong(source, clef).map((n) => {
     const [dur, dotted] = FROM_BEATS[n.beats] ?? ['q', false];
-    return { pitches: n.pitches.map(pitchText), dur, dotted };
+    const token: EditToken = { pitches: n.pitches.map(pitchText), dur, dotted };
+    if (n.tieNext) token.tie = true;
+    return token;
   });
 }
 

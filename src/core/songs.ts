@@ -4,6 +4,7 @@ import { parsePitch, toMidi, type Clef, type Pitch, type StaffKind } from './not
 //   음표 = 음높이 + 길이 (w 온음표, h 2분, q 4분, e 8분) + 선택적 '.'(점음표)  예) C4q, F#4h, D4q.
 //   화음 = 음높이를 '+' 로 연결                                                예) C3+E3+G3h
 //   쉼표 = R + 길이                                                           예) Rq
+//   붙임줄 = 끝에 '~' — 다음 음표(같은 음)까지 소리를 이어 내고, 다음 음은 누르지 않는다  예) C4w~ | C4q
 // 양손 곡은 높은음자리표(오른손)와 낮은음자리표(왼손) 성부를 따로 적는다.
 
 export interface SongNote {
@@ -14,6 +15,12 @@ export interface SongNote {
   startBeat: number;
   measure: number;
   clef: Clef;
+  /** 다음 음표와 붙임줄로 이어짐 */
+  tieNext?: boolean;
+  /** 앞 음표에서 붙임줄로 이어진 음 — 누르지 않고 소리만 이어진다 */
+  tied?: boolean;
+  /** 붙임줄을 포함해 소리가 나는 길이(박) */
+  holdBeats: number;
 }
 
 export interface Song {
@@ -35,7 +42,7 @@ export interface SongStep {
 
 const DURATIONS: Record<string, number> = { w: 4, h: 2, q: 1, e: 0.5 };
 const PITCH = '[A-G][#b]?-?\\d';
-const TOKEN = new RegExp(`^(R|${PITCH}(?:\\+${PITCH})*)([whqe])(\\.?)$`);
+const TOKEN = new RegExp(`^(R|${PITCH}(?:\\+${PITCH})*)([whqe])(\\.?)(~?)$`);
 
 export function parseSong(source: string, clef: Clef = 'treble'): SongNote[] {
   const notes: SongNote[] = [];
@@ -50,10 +57,31 @@ export function parseSong(source: string, clef: Clef = 'treble'): SongNote[] {
     if (!m) throw new Error(`잘못된 토큰: ${token}`);
     const beats = DURATIONS[m[2]] * (m[3] ? 1.5 : 1);
     const pitches = m[1] === 'R' ? [] : m[1].split('+').map(parsePitch).sort((a, b) => toMidi(a) - toMidi(b));
-    notes.push({ pitches, beats, startBeat: beat, measure, clef });
+    notes.push({ pitches, beats, startBeat: beat, measure, clef, tieNext: m[4] === '~' && pitches.length > 0, holdBeats: beats });
     beat += beats;
   }
+  for (let i = notes.length - 1; i >= 0; i--) {
+    const next = notes[i + 1];
+    if (notes[i].tieNext && next && next.pitches.length > 0) {
+      next.tied = true;
+      notes[i].holdBeats = notes[i].beats + next.holdBeats;
+    } else {
+      notes[i].tieNext = false;
+    }
+  }
   return notes;
+}
+
+/** 붙임줄: 앞 음표 index → 이어지는 음표 index (악보에 붙임줄을 그릴 때) */
+export function tieTargets(notes: SongNote[]): Map<number, number> {
+  const map = new Map<number, number>();
+  notes.forEach((n, i) => {
+    if (!n.tieNext) return;
+    const end = n.startBeat + n.beats;
+    const j = notes.findIndex((o, k) => k > i && o.tied && o.clef === n.clef && o.startBeat === end);
+    if (j >= 0) map.set(i, j);
+  });
+  return map;
 }
 
 export function buildSong(
@@ -74,7 +102,7 @@ export function buildSong(
 export function songSteps(s: Song): SongStep[] {
   const steps = new Map<number, SongStep>();
   s.notes.forEach((n, i) => {
-    if (n.pitches.length === 0) return;
+    if (n.pitches.length === 0 || n.tied) return;
     const step = steps.get(n.startBeat) ?? { startBeat: n.startBeat, noteIndexes: [], midis: [] };
     step.noteIndexes.push(i);
     for (const p of n.pitches) if (!step.midis.includes(toMidi(p))) step.midis.push(toMidi(p));

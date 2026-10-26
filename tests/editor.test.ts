@@ -51,3 +51,10 @@ describe('곡 만들기 편집기', () => {
     expect(t).toHaveLength(3);
   });
 });
+
+describe('편집기 붙임줄', () => {
+  it('표기 왕복', () => {
+    const source = 'C4w~ | C4q D4q E4h';
+    expect(tokensToSource(sourceToTokens(source, 'treble'), 4)).toBe(source);
+  });
+});

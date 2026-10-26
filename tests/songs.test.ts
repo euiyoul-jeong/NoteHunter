@@ -111,3 +111,18 @@ describe('내 곡 가져오기', () => {
     expect(() => getSong('my-test')).toThrow();
   });
 });
+
+describe('붙임줄', () => {
+  it('뒤 음은 누르지 않고 앞 음 소리가 이어진다', () => {
+    const notes = parseSong('C4w~ | C4q D4q E4h');
+    expect(notes[0].tieNext).toBe(true);
+    expect(notes[0].holdBeats).toBe(5);
+    expect(notes[1].tied).toBe(true);
+    expect(notes[2].tied).toBeFalsy();
+  });
+
+  it('따라 치기 단계에서 이어진 음은 빠진다', () => {
+    const song = getSong('my-tie', [{ id: 'my-tie', title: 't', bpm: 90, beatsPerMeasure: 4, treble: 'C4w~ | C4q D4q E4h' }]);
+    expect(songSteps(song).map((s) => s.startBeat)).toEqual([0, 5, 6]);
+  });
+});

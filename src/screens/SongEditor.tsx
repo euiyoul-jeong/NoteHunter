@@ -79,6 +79,16 @@ export function SongEditor({ data, update, go, mode, songId }: ScreenProps & { m
     stackable.current = false;
   };
 
+  // 마지막 음표에 붙임줄 켜기/끄기 (다음에 같은 음을 이어서 넣으면 소리가 이어진다)
+  const toggleTie = () => {
+    setTokens((t) => {
+      const last = t[t.length - 1];
+      if (!last || last.pitches.length === 0) return t;
+      return [...t.slice(0, -1), { ...last, tie: !last.tie }];
+    });
+    stackable.current = false;
+  };
+
   const undo = () => {
     setTokens((t) => t.slice(0, -1));
     stackable.current = false;
@@ -210,6 +220,13 @@ export function SongEditor({ data, update, go, mode, songId }: ScreenProps & { m
           </button>
           <button className={`chip ${chord ? 'active' : ''}`} onClick={toggleChord} title="켜면 누르는 음이 한 화음으로 쌓여요">
             화음
+          </button>
+          <button
+            className={`chip ${voices[hand][voices[hand].length - 1]?.tie ? 'active' : ''}`}
+            onClick={toggleTie}
+            title="마지막 음표를 다음 음과 붙임줄로 잇기"
+          >
+            붙임줄
           </button>
           <button className="chip" onClick={undo} disabled={voices[hand].length === 0}>
             ⌫ 지우기

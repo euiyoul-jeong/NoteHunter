@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { getSong, songMidis } from '../core/songs';
+import { getSong, songMidis, tieTargets } from '../core/songs';
 import { keyboardRange, toMidi } from '../core/notes';
 import { audioNow, createBus, playClick, unlockAudio } from '../core/audio';
 import { JUDGE_POINTS, hasPendingNear, isMissed, judgeOffset, pickTarget, type Judgement, type Target } from '../core/judge';
@@ -49,6 +49,7 @@ export function RhythmMode({ data, update, go, songId, tempo }: ScreenProps & { 
   const pxPerSec = PX_PER_BEAT / spb;
   const range = useMemo(() => keyboardRange(songMidis(song)), [song]);
 
+  const ties = useMemo(() => tieTargets(song.notes), [song]);
   const times = useMemo(() => song.notes.map((n) => LEAD + (countIn + n.startBeat) * spb), [song, countIn, spb]);
   const songBeats = Math.max(...song.notes.map((n) => n.startBeat + n.beats));
   const endTime = LEAD + (countIn + songBeats) * spb;
@@ -65,7 +66,7 @@ export function RhythmMode({ data, update, go, songId, tempo }: ScreenProps & { 
   const [feedback, setFeedback] = useState<{ id: number; text: string; kind: string } | null>(null);
   const game = useRef<Game>({
     targets: song.notes.flatMap((n, i) =>
-      n.pitches.map((p) => ({ time: times[i], midi: toMidi(p), judged: false, note: i, result: null })),
+      (n.tied ? [] : n.pitches).map((p) => ({ time: times[i], midi: toMidi(p), judged: false, note: i, result: null })),
     ),
     score: 0,
     combo: 0,
@@ -199,7 +200,7 @@ export function RhythmMode({ data, update, go, songId, tempo }: ScreenProps & { 
   // 음표 색: 구성음이 모두 판정되면 가장 나쁜 판정으로 표시
   const noteState = (i: number): NoteState => {
     const ts = g.targets.filter((x) => x.note === i);
-    if (ts.length === 0) return 'faded';
+    if (ts.length === 0) return song.notes[i].tied ? 'normal' : 'faded';
     if (ts.some((x) => !x.judged)) return 'normal';
     if (ts.some((x) => x.result === 'miss')) return 'miss';
     return ts.some((x) => x.result === 'good') ? 'good' : 'perfect';
@@ -209,7 +210,8 @@ export function RhythmMode({ data, update, go, songId, tempo }: ScreenProps & { 
   song.notes.forEach((n, i) => {
     const x = xAt(times[i]);
     if (!visible(x)) return;
-    staffNotes.push({ id: i, pitches: n.pitches, clef: n.clef, beats: n.beats, x, state: noteState(i) });
+    const tj = ties.get(i);
+    staffNotes.push({ id: i, pitches: n.pitches, clef: n.clef, beats: n.beats, x, state: noteState(i), tieTo: tj === undefined ? undefined : xAt(times[tj]) });
   });
   const barLines = measureStarts.map((b) => xAt(LEAD + (countIn + b) * spb) - PX_PER_BEAT * 0.3).filter(visible);
 
