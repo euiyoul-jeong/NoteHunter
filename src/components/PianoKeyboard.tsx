@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react';
 import { MIDDLE_C, isBlackKey, midiToPitch, pitchName, type NameStyle } from '../core/notes';
 import { playNote, unlockAudio } from '../core/audio';
 
-/** correct/wrong 은 잠깐, held 는 화음 모으는 동안 유지, hint 는 정답 안내 */
-export type KeyMark = 'correct' | 'wrong' | 'hint' | 'held';
+/** correct/wrong 은 잠깐, held 는 화음 모으는 동안 유지, hint 는 정답 안내, play 는 듣기 자동 연주 */
+export type KeyMark = 'correct' | 'wrong' | 'hint' | 'held' | 'play';
 
 interface Props {
   /** 건반 범위(양 끝은 흰 건반) */

@@ -1087,3 +1087,23 @@ button {
     align-items: center;
   }
 }
+
+/* ---------- 듣기: 자동 연주 ---------- */
+.note-playing {
+  color: var(--blue-ink);
+}
+
+.note-playing .head {
+  filter: drop-shadow(0 0 4px rgba(90, 169, 255, 0.9));
+}
+
+.key.white.mark-play {
+  background: linear-gradient(#bfe0ff, #8cc4ff);
+  color: #12355f;
+  box-shadow: inset 0 -4px 0 #5aa9ff;
+}
+
+.key.black.mark-play {
+  background: linear-gradient(#3b7be0, #2456a8);
+  color: #fff;
+}

@@ -28,7 +28,7 @@ function labelY(kind: StaffKind, clef: Clef): number {
   return clef === 'treble' ? 16 : BASS_TOP_GRAND + STAFF_SPAN + 44;
 }
 
-export type NoteState = 'normal' | 'current' | 'done' | 'wrong' | 'perfect' | 'good' | 'miss' | 'faded';
+export type NoteState = 'normal' | 'current' | 'done' | 'wrong' | 'perfect' | 'good' | 'miss' | 'faded' | 'playing';
 
 export interface StaffNote {
   id: number;

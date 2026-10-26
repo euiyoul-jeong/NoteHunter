@@ -28,7 +28,9 @@ export function PracticeMode({ data, update, go, songId }: ScreenProps & { songI
   const [listening, setListening] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const busRef = useRef<GainNode | null>(null);
-  const listenTimer = useRef<number>();
+  const listenTimers = useRef<number[]>([]);
+  // 듣기 중 지금 소리 나는 음표 index — 건반 자동 눌림·악보 강조에 쓴다
+  const [playingNotes, setPlayingNotes] = useState<Set<number>>(() => new Set());
   // 양손·화음을 동시에 누르면 한 렌더 안에 입력이 여러 번 들어오므로 진행 상태는 ref 로
   const live = useRef({ pos: 0, collected: [] as number[] });
   const { marks, flash } = useKeyMarks();
@@ -36,13 +38,17 @@ export function PracticeMode({ data, update, go, songId }: ScreenProps & { songI
   const step = steps[pos];
   const done = step === undefined;
 
-  // 현재 음표가 화면 왼쪽 1/3 지점에 오도록 스크롤
-  useEffect(() => {
+  // 음표가 화면 왼쪽 1/3 지점에 오도록 스크롤
+  const scrollToNote = (noteIndex: number) => {
     const el = scrollRef.current;
-    if (!el || done) return;
+    if (!el) return;
     const svg = el.querySelector('svg');
     const scale = (svg ? svg.getBoundingClientRect().height : el.clientHeight) / viewHeight;
-    el.scrollTo({ left: layout.xs[step.noteIndexes[0]] * scale - el.clientWidth / 3, behavior: 'smooth' });
+    el.scrollTo({ left: layout.xs[noteIndex] * scale - el.clientWidth / 3, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    if (!done) scrollToNote(step.noteIndexes[0]);
   }, [pos, done, layout, viewHeight]);
 
   useEffect(() => {
@@ -56,7 +62,9 @@ export function PracticeMode({ data, update, go, songId }: ScreenProps & { songI
   function stopListening() {
     busRef.current?.disconnect();
     busRef.current = null;
-    clearTimeout(listenTimer.current);
+    listenTimers.current.forEach(clearTimeout);
+    listenTimers.current = [];
+    setPlayingNotes(new Set());
     setListening(false);
   }
 
@@ -66,14 +74,33 @@ export function PracticeMode({ data, update, go, songId }: ScreenProps & { songI
     const bus = createBus();
     busRef.current = bus;
     const spb = 60 / song.bpm;
-    const t0 = audioNow() + 0.1;
+    const lead = 0.1;
+    const t0 = audioNow() + lead;
+    const timers: number[] = [];
+    const at = (sec: number, fn: () => void) => timers.push(window.setTimeout(fn, sec * 1000));
     let end = 0;
-    for (const n of song.notes) {
+    song.notes.forEach((n, i) => {
+      if (n.pitches.length === 0) return;
       for (const p of n.pitches) playNote(toMidi(p), Math.min(n.beats * spb + 0.3, 2), t0 + n.startBeat * spb, bus);
+      // 소리와 같은 시각에 건반을 누르고, 다음 음 직전에 뗀다
+      const on = lead + n.startBeat * spb;
+      const off = on + Math.max(n.beats * spb - 0.06, 0.08);
+      at(on, () => {
+        setPlayingNotes((s) => new Set(s).add(i));
+        scrollToNote(i);
+      });
+      at(off, () =>
+        setPlayingNotes((s) => {
+          const next = new Set(s);
+          next.delete(i);
+          return next;
+        }),
+      );
       end = Math.max(end, (n.startBeat + n.beats) * spb);
-    }
+    });
+    at(end + 0.5, stopListening);
+    listenTimers.current = timers;
     setListening(true);
-    listenTimer.current = window.setTimeout(stopListening, (end + 0.5) * 1000);
   }
 
   function finish() {
@@ -144,6 +171,7 @@ export function PracticeMode({ data, update, go, songId }: ScreenProps & { songI
     if (n.pitches.length === 0) state = 'faded';
     else if (currentNotes.has(i)) state = tries > 0 ? 'wrong' : 'current';
     else if (si !== undefined && (done || si < pos)) state = missed.has(si) ? 'miss' : 'done';
+    if (playingNotes.has(i)) state = 'playing';
     const label =
       n.pitches.length > 0 && (showNames || (hint && currentNotes.has(i)))
         ? n.pitches.map((p) => pitchName(p, settings.nameStyle)).join('·')
@@ -152,6 +180,7 @@ export function PracticeMode({ data, update, go, songId }: ScreenProps & { songI
   });
 
   const keyMarks: Partial<Record<number, KeyMark>> = { ...marks };
+  for (const i of playingNotes) for (const p of song.notes[i].pitches) keyMarks[toMidi(p)] = 'play';
   for (const m of collected) keyMarks[m] ??= 'held';
   if (hint && step) for (const m of step.midis) if (!collected.includes(m)) keyMarks[m] ??= 'hint';
 
