@@ -2,6 +2,10 @@
 
 악보(높은음자리표)를 보고 화면 피아노 건반을 눌러 음표 읽기를 익히는 학습 게임.
 
+## 바로 플레이
+**https://euiyoul-jeong.github.io/NoteHunter/** — 브라우저에서 바로 실행 (PC·휴대폰). 홈 화면 아래에 안드로이드 앱 다운로드 QR이 있다.
+`main` 에 푸시하면 GitHub Actions(`.github/workflows/pages.yml`)가 자동으로 다시 배포한다.
+
 ## 안드로이드 앱 다운로드
 [Releases](https://github.com/euiyoul-jeong/NoteHunter/releases/latest) 에서 `NoteHunter-x.y.z.apk` 를 폰으로 받아 설치한다.
 처음 설치할 때 "알 수 없는 앱 설치" 허용이 필요하다. 앱은 가로 화면으로 실행된다.

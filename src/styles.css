@@ -1027,3 +1027,63 @@ button {
   font-size: clamp(8px, 1.3vw, 12px);
   margin-bottom: 6px;
 }
+
+/* ---------- 웹 전용: 안드로이드 앱 다운로드 ---------- */
+.app-download {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--panel);
+  text-align: left;
+}
+
+.app-download img {
+  flex: none;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.app-download-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.app-download-text h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.app-download-text p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.app-download-text a.btn {
+  text-decoration: none;
+}
+
+.app-download-text small {
+  color: var(--muted);
+}
+
+.app-download-text small a {
+  color: var(--accent);
+}
+
+@media (max-width: 480px) {
+  .app-download {
+    flex-direction: column;
+    text-align: center;
+  }
+  .app-download-text {
+    align-items: center;
+  }
+}
