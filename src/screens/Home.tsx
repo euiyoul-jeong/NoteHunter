@@ -10,7 +10,7 @@ export function Home({ go }: ScreenProps) {
     <main className="page home">
       <div className="logo">
         <span className="logo-note">♪</span>
-        <h1>음표 사냥꾼</h1>
+        <h1>영우의 음표 사냥꾼</h1>
       </div>
       <p className="tagline">악보를 읽고, 건반을 눌러 음표를 잡아라!</p>
 
