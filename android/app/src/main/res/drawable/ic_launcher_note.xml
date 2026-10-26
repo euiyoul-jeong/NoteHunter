@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 음표 머리 -->
+    <path
+        android:fillColor="#FFB84D"
+        android:pathData="M35,70a11,8 -20 1,0 22,0a11,8 -20 1,0 -22,0z" />
+    <!-- 기둥 -->
+    <path
+        android:fillColor="#FFB84D"
+        android:pathData="M53,34h4.5v36h-4.5z" />
+    <!-- 꼬리 -->
+    <path
+        android:fillColor="#FFB84D"
+        android:pathData="M57.5,34c0,9 13,11 13,24c0,5 -2,9 -5,12c1.5,-3.5 2.5,-6.5 2.5,-10c0,-8.5 -8,-11 -10.5,-14z" />
+</vector>

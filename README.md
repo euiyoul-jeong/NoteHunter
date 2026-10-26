@@ -2,6 +2,13 @@
 
 악보(높은음자리표)를 보고 화면 피아노 건반을 눌러 음표 읽기를 익히는 학습 게임.
 
+## 안드로이드 앱 다운로드
+[Releases](https://github.com/euiyoul-jeong/NoteHunter/releases/latest) 에서 `NoteHunter-x.y.z.apk` 를 폰으로 받아 설치한다.
+처음 설치할 때 "알 수 없는 앱 설치" 허용이 필요하다. 앱은 가로 화면으로 실행된다.
+
+새 버전 배포: `git tag v1.0.1 && git push origin v1.0.1` → GitHub Actions(`.github/workflows/android.yml`)가 서명된 APK를 빌드해 Releases 에 올린다.
+서명 키는 저장소 비밀값(`ANDROID_KEYSTORE_*`)에 있고, 원본은 저장소 밖에 별도 보관한다.
+
 ## 실행
 ```
 npm install

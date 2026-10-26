@@ -1,0 +1,76 @@
+# 안드로이드 APK 빌드.
+# - v* 태그를 푸시하면 서명된 APK를 빌드해 GitHub Releases 에 올린다.
+# - Actions 탭에서 수동 실행(workflow_dispatch)하면 빌드 결과를 아티팩트로만 남긴다.
+name: Android APK
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npx cap sync android
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: 버전 결정
+        id: version
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            echo "name=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=0.0.${{ github.run_number }}-dev" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 서명 키 복원
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.jks"
+
+      - name: APK 빌드
+        working-directory: android
+        env:
+          NOTEHUNTER_KEYSTORE: ${{ runner.temp }}/release.jks
+          NOTEHUNTER_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          NOTEHUNTER_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          NOTEHUNTER_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon \
+            -PversionCode=${{ github.run_number }} \
+            -PversionName=${{ steps.version.outputs.name }}
+          mkdir -p ../out
+          cp app/build/outputs/apk/release/app-release.apk "../out/NoteHunter-${{ steps.version.outputs.name }}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NoteHunter-${{ steps.version.outputs.name }}
+          path: out/*.apk
+
+      - name: Release 에 APK 올리기
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*.apk
+          body: |
+            ## 설치 방법
+            1. 안드로이드 폰에서 아래 **NoteHunter-${{ steps.version.outputs.name }}.apk** 를 눌러 다운로드
+            2. 다운로드한 파일을 열고, "알 수 없는 앱 설치"를 허용하라는 안내가 나오면 허용
+            3. 설치 후 **Note Hunter** 실행 (가로 화면 권장)
