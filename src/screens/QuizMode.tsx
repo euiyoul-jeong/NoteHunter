@@ -5,6 +5,7 @@ import { unlockAudio } from '../core/audio';
 import { Staff, staffHeight } from '../components/Staff';
 import { PianoKeyboard, type KeyMark } from '../components/PianoKeyboard';
 import { Hud } from '../components/Hud';
+import { SettingChip } from '../components/SettingChip';
 import { useKeyMarks } from '../components/useKeyMarks';
 import { useStaffWidth } from '../components/useStaffWidth';
 import type { ScreenProps } from '../types';
@@ -160,11 +161,14 @@ export function QuizMode({ data, update, go, specKey }: ScreenProps & { specKey:
         ]}
         progress={timed ? timeLeft / spec.duration : undefined}
         right={
-          !timed && phase === 'play' ? (
-            <button className="chip" onClick={finish}>
-              끝내기
-            </button>
-          ) : undefined
+          <>
+            <SettingChip data={data} update={update} field="showKeyLabels" label="건반 이름" />
+            {!timed && phase === 'play' && (
+              <button className="chip" onClick={finish}>
+                끝내기
+              </button>
+            )}
+          </>
         }
       />
       <div className="staff-area" ref={staffRef}>

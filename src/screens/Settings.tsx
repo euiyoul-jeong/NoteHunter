@@ -35,19 +35,6 @@ export function Settings({ data, update, go }: ScreenProps) {
         </div>
 
         <label className="setting-row">
-          <span>
-            건반에 음이름 표시
-            <small>익숙해지면 끄고 도전해 보세요</small>
-          </span>
-          <input type="checkbox" checked={s.showKeyLabels} onChange={(e) => set({ showKeyLabels: e.target.checked })} />
-        </label>
-
-        <label className="setting-row">
-          <span>리듬 게임 메트로놈</span>
-          <input type="checkbox" checked={s.metronome} onChange={(e) => set({ metronome: e.target.checked })} />
-        </label>
-
-        <label className="setting-row">
           <span>음량</span>
           <input
             type="range"

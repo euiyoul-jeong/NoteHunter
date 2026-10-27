@@ -6,6 +6,7 @@ import { JUDGE_POINTS, hasPendingNear, isMissed, judgeOffset, pickTarget, type J
 import { CLEF_WIDTH, Staff, staffHeight, type NoteState, type StaffNote } from '../components/Staff';
 import { PianoKeyboard } from '../components/PianoKeyboard';
 import { Hud } from '../components/Hud';
+import { SettingChip } from '../components/SettingChip';
 import { useKeyMarks } from '../components/useKeyMarks';
 import { useStaffWidth } from '../components/useStaffWidth';
 import type { ScreenProps } from '../types';
@@ -78,6 +79,8 @@ export function RhythmMode({ data, update, go, songId, tempo }: ScreenProps & { 
   });
   const t0 = useRef(0);
   const bus = useRef<GainNode | null>(null);
+  // 곡 구간 메트로놈은 따로 — 게임 중 켜고 끄면 음량만 바꾼다
+  const metroBus = useRef<GainNode | null>(null);
   const raf = useRef(0);
   const finished = useRef(false);
   const { marks, flash } = useKeyMarks();
@@ -88,9 +91,14 @@ export function RhythmMode({ data, update, go, songId, tempo }: ScreenProps & { 
     () => () => {
       cancelAnimationFrame(raf.current);
       bus.current?.disconnect();
+      metroBus.current?.disconnect();
     },
     [],
   );
+
+  useEffect(() => {
+    if (metroBus.current) metroBus.current.gain.value = settings.metronome ? 1 : 0;
+  }, [settings.metronome]);
 
   const showFeedback = (text: string, kind: string) => setFeedback({ id: performance.now(), text, kind });
 
@@ -112,9 +120,11 @@ export function RhythmMode({ data, update, go, songId, tempo }: ScreenProps & { 
   const start = () => {
     unlockAudio();
     bus.current = createBus();
+    metroBus.current = createBus();
+    metroBus.current.gain.value = settings.metronome ? 1 : 0;
     t0.current = audioNow() + 0.15;
 
-    // 카운트인 + (설정 시) 곡 내내 메트로놈. 못갖춘마디면 강박 위치를 그만큼 민다.
+    // 카운트인은 항상, 곡 내내 메트로놈은 켜져 있을 때만 들린다. 못갖춘마디면 강박 위치를 그만큼 민다.
     const firstMeasureBeats = Math.max(
       ...song.notes.filter((n) => n.measure === 0).map((n) => n.startBeat + n.beats),
     );
@@ -122,10 +132,9 @@ export function RhythmMode({ data, update, go, songId, tempo }: ScreenProps & { 
     const totalBeats = countIn + Math.ceil(songBeats);
     for (let b = 0; b < totalBeats; b++) {
       const inSong = b >= countIn;
-      if (inSong && !settings.metronome) break;
       const rel = inSong ? b - countIn - pickup : b;
       const accent = ((rel % countIn) + countIn) % countIn === 0;
-      playClick(t0.current + LEAD + b * spb, accent, bus.current);
+      playClick(t0.current + LEAD + b * spb, accent, inSong ? metroBus.current : bus.current);
     }
 
     setPhase('play');
@@ -228,6 +237,12 @@ export function RhythmMode({ data, update, go, songId, tempo }: ScreenProps & { 
           { label: '콤보', value: g.combo },
         ]}
         progress={Math.max(0, t - LEAD - countIn * spb) / (songBeats * spb)}
+        right={
+          <>
+            <SettingChip data={data} update={update} field="showKeyLabels" label="건반 이름" />
+            <SettingChip data={data} update={update} field="metronome" label="메트로놈" />
+          </>
+        }
       />
       <div className="staff-area" ref={staffRef}>
         <Staff fluid kind={song.staff} width={staffWidth} notes={staffNotes} barLines={barLines} hitLineX={HIT_X} />

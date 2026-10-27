@@ -6,6 +6,7 @@ import { audioNow, createBus, playNote, unlockAudio } from '../core/audio';
 import { CLEF_WIDTH, Staff, staffHeight, type NoteState, type StaffNote } from '../components/Staff';
 import { PianoKeyboard, type KeyMark } from '../components/PianoKeyboard';
 import { Hud } from '../components/Hud';
+import { SettingChip } from '../components/SettingChip';
 import { useKeyMarks } from '../components/useKeyMarks';
 import type { ScreenProps } from '../types';
 
@@ -201,6 +202,7 @@ export function PracticeMode({ data, update, go, songId }: ScreenProps & { songI
             <button className={`chip ${showNames ? 'active' : ''}`} onClick={() => setShowNames((v) => !v)}>
               음이름
             </button>
+            <SettingChip data={data} update={update} field="showKeyLabels" label="건반 이름" />
             <button className={`chip ${listening ? 'active' : ''}`} onClick={listen}>
               {listening ? '■ 정지' : '▶ 듣기'}
             </button>
